@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+        body {
+            background-size: 10px 1000px !important;
+            background: rgb(0, 0, 0);
+            margin: 0;
+            font-weight: bolder;
+            overflow: hidden auto;
+            width: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+            height: 100vh;
+            text-align: center;
+        }
+
+        * {
+            font-family: Roboto, sans-serif;
+        }
+
+        .main-container {
+            padding: 30px;
+            padding-top: 0;
+            color: white;
+            margin-top: 20px;
+            z-index: 1;
+            height: max-content;
+            width: calc(100% - 60px);
+            columns: 3 auto;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            text-align: center;
+            justify-content: center;
+        }
+
+        a {
+            color: white;
+        }
+
+        .analytic-container {
+            margin-top: 50px;
+            width: 60%;
+            background: white;
+            height: 500px;
+            border-radius: 5px;
+            overflow: auto;
+            color: black;
+        }
+
+        .analytics-header {
+            width: calc(100% - 40px);
+            padding: 20px;
+            font-size: 15px;
+            height: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .analytics-entry {
+            width: 90%;
+            border-top: 1px solid rgb(100, 100, 100, 0.5);
+            border-bottom: 1px solid rgb(100, 100, 100, 0.5);
+            margin: auto;
+            height: 20px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        .analytic-container-sites {
+            width: 100%;
+        }
+
+        .analytics-site-name {
+            float: left;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            color: #5884d5;
+        }
+
+        .analytics-site-count {
+            font-size: 14px;
+            height: 14px;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            float: right;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="main-container">
+          <div class="analytic-container">
+            <div class="analytics-header">
+              <span style="float:left">Live User Count</span>
+              <span style="float:right"><span class="user-count-analytics">0</span> Users</span>
+            </div>
+            <div class="analytic-container-sites"></div>
+          </div>
+        </div>
+
+        <script>
+            function InitiateAnalytics() {
+                fetch('/data/data/').then(e=>e.text()).then(text => {
+                    var sites = {};
+
+                    try {
+                        JSON.parse(text)
+                    } catch {return null};
+                    text = JSON.parse(text).result;
+
+                    document.querySelector('.user-count-analytics').innerText = text.length;
+
+                    text.map(
+                        e => sites[new URL(e.data).origin] ? sites[new URL(e.data).origin]++ : sites[new URL(e.data).origin] = 1
+                    );
+
+                    sites = Object.entries(sites);
+
+                    sites = sites.sort(function(a,b) {
+                        return a[1] - b[1];
+                    }).reverse();
+                    
+                    document.querySelector('.analytic-container-sites').innerHTML = (
+                        sites
+                            .map(e=>`<div class="analytics-entry"><a target="_blank" class="analytics-site-name" href="${e[0]}">${e[0]}</a><span class="analytics-site-count">${e[1]}</span>`)
+                            .join('</div>')
+                    );
+                })
+            }
+
+            InitiateAnalytics();
+
+            setInterval(InitiateAnalytics, 5000)
+        </script>
+    </body>
+</html>
