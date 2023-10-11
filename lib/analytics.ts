@@ -6,6 +6,7 @@ interface User {
     id: string;
     data: any;
     time: number;
+    ip?: string;
 }
 
 export default class Analytics {
@@ -48,13 +49,14 @@ export default class Analytics {
             "": () => {
                 return this.routes;
             },
-            "/create": (body: any) => {
+            "/create": (body: any, method: string, ip: string) => {
                 const id = this.id();
     
                 this.users.push({
                     id,
                     data: body,
-                    time: new Date().getTime() + 22 * 1000
+                    time: new Date().getTime() + 22 * 1000,
+                    ip
                 });
     
                 return id;
@@ -114,7 +116,7 @@ export default class Analytics {
             const handler = this.handlers[req.url?.replace(/\/$/g, "")?.replace(this.prefix, "") || ""];
 
             if (handler) {
-                const result = handler(id, req.method || "GET");
+                const result = handler(id, req.method || "GET", (req as any).socket.remoteAddress || req.headers["x-forwarded-for"] || "");
 
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ result }));
