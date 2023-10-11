@@ -116,7 +116,7 @@ export default class Analytics {
             const handler = this.handlers[req.url?.replace(/\/$/g, "")?.replace(this.prefix, "") || ""];
 
             if (handler) {
-                const result = handler(id, req.method || "GET", (req as any).socket.remoteAddress || req.headers["x-forwarded-for"] || "");
+                const result = handler(id, req.method || "GET", req.headers["x-forwarded-for"] || "");
 
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ result }));
